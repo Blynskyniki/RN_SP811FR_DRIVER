@@ -2,6 +2,9 @@ package com.rnsp811frdriver
 
 import android.os.Build
 import android.util.Log
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.bridge.WritableMap
 import com.rnsp811frdriver.driver.utils.Utils
 import com.rnsp811frdriver.utils.*
 import com.rnsp811frdriver.utils.constants.Commands
@@ -107,7 +110,7 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
   }
 
   // Скидка на товар/чек
-  fun saleForDocOrProduct(type: Discount, percentOrSum: Int, name: String = "") {
+  fun saleForDocOrProduct(type: Discount, percentOrSum: Int, name: String = ""): Response {
     var params = byteArrayOf()
 //      doc type
     params += type.data
@@ -124,7 +127,7 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
 
     Log.e("SP811", "DISCOUNT : " + res.errorMsg)
 
-
+    return res
   }
 
   // Распечатать отчет без гашения (X-отчет)
@@ -211,10 +214,7 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
     params = params.plus("1".toByteArray())
     params = params.plus(Constants.FS)
     params = params.plus("10".toByteArray())
-    params = params.plus(Constants.FS)
-    params = params.plus("2".toByteArray())
-    params = params.plus(Constants.FS)
-    params = params.plus("0".toByteArray())
+
 
     val res = requestWrapper(
       CommandGenerator(this.password).addCommand(
@@ -223,7 +223,7 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
       )
     )
 
-    Log.d("SP811", "initFR : " + res.errorMsg)
+    Log.d("SP811", "setNDS : " + res.errorMsg)
 
     return res
 
@@ -318,7 +318,7 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
   }
 
   // Запрос статуса состояния ФР
-  fun checkFr() {
+  fun checkFr(): WritableMap? {
 
     val res = requestWrapper(
       CommandGenerator(this.password).addCommand(
@@ -338,7 +338,7 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
       "SP811",
       "current ==> ${getFrFatalErrors(current, SP_811_FR_CURRENT_ERRORS)}"
     )
-    val first = (doc and 0xF0) shr 4
+//    val first = (doc and 0xF0) shr 4
     val second = doc and 0x0F
 
     Log.d(
@@ -346,11 +346,14 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
       "doc ==> ${SP_811_FR_DOC_ERRORS[second]}"
 
     )
-
+    val data = Arguments.createMap()
+    data.putString("fatal", getFrFatalErrors(fatal, SP_811_FR_FATAL_ERRORS).toString())
+    data.putString("current", getFrFatalErrors(current, SP_811_FR_CURRENT_ERRORS).toString())
+    data.putString("doc", SP_811_FR_DOC_ERRORS[second].toString())
 
     Log.d("SP811", "CHECK_FR : " + res.toString() + "\n" + Utils.getHexString(res.data))
 
-
+    return data
   }
 
   fun getFrParams(row: Int, column: Int): String {
@@ -409,7 +412,7 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
 
   }
 
-  fun payment(type: Int, summOrCount: Int, text: String) {
+  fun payment(type: Int, summOrCount: Int, text: String): Response {
     var params = byteArrayOf()
     params += type.toString().toByteArray()
     params += Constants.FS
@@ -423,19 +426,12 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
       )
     )
     Log.d("SP811", "PAYMENT_OPERATION  ${res.errorMsg}")
-
-
+    return res
   }
 
 
   private fun requestWrapper(command: CommandGenerator): Response {
-
-//        this.transport.connect()
-
-
-    val res = this.transport.sendCommandAndReceiveResponse(command)
-//        this.transport.closeConnection()
-    return res
+    return this.transport.sendCommandAndReceiveResponse(command)
   }
 
 }

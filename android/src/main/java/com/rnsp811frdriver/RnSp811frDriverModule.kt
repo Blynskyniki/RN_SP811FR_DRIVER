@@ -2,10 +2,7 @@ package com.rnsp811frdriver
 
 import android.util.Log
 import com.facebook.react.bridge.*
-import com.rnsp811frdriver.utils.DocumentTypes
-import com.rnsp811frdriver.utils.Product
-import com.rnsp811frdriver.utils.Response
-import com.rnsp811frdriver.utils.Transport
+import com.rnsp811frdriver.utils.*
 
 class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -99,6 +96,7 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
 
 
   }
+
   @ReactMethod
   fun addProduct(
     data: ReadableMap,
@@ -117,6 +115,55 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
 
   }
   @ReactMethod
+  fun payment(
+    data: ReadableMap,
+    promise: Promise
+  ) {
+    val type = data.getInt("type")
+    val sum = data.getInt("sum")
+    val text = data.getString("text")!!
+    this.useNewTread(promise) {
+      val res = this.driver?.payment(type,sum,text)
+      if (res?.isError == true) {
+        promise.reject(java.lang.Exception(res.errorMsg))
+      } else {
+        promise.resolve(Arguments.createMap())
+      }
+    }
+
+
+  }
+
+  @ReactMethod
+  fun saleForDocOrProduct(
+    data: ReadableMap,
+    promise: Promise
+  ) {
+    val type = data.getString("type")!!
+    val percentOrSum = data.getInt("percentOrSum")
+    val name = data.getString("name")!!
+
+    var res: Response? = null
+    this.useNewTread(promise) {
+      when (type) {
+        "p" -> res =
+          this.driver?.saleForDocOrProduct(Discount.FOR_AMOUNT, percentOrSum, name)
+        "s" -> res =
+          this.driver?.saleForDocOrProduct(Discount.PERCENT, percentOrSum, name)
+        else -> promise.reject(java.lang.Exception("Нет такого типа скидки"))
+      }
+
+      if (res?.isError == true) {
+        promise.reject(java.lang.Exception(res?.errorMsg))
+      } else {
+        promise.resolve(Arguments.createMap())
+      }
+    }
+
+
+  }
+
+  @ReactMethod
   fun openCashDrawer(
     promise: Promise
   ) {
@@ -131,8 +178,21 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
 
 
   }
+
   @ReactMethod
-  fun printText(data:String,
+  fun checkFr(
+    promise: Promise
+  ) {
+    this.useNewTread(promise) {
+      promise.resolve(this.driver?.checkFr())
+    }
+
+
+  }
+
+  @ReactMethod
+  fun printText(
+    data: String,
     promise: Promise
   ) {
     this.useNewTread(promise) {
@@ -146,6 +206,7 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
 
 
   }
+
   @ReactMethod
   fun abortDocument(
     promise: Promise
@@ -161,6 +222,7 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
 
 
   }
+
   @ReactMethod
   fun holdCheck(
     promise: Promise
@@ -176,7 +238,8 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
 
 
   }
-    @ReactMethod
+
+  @ReactMethod
   fun printCopyCheck(
     promise: Promise
   ) {
@@ -191,6 +254,7 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
 
 
   }
+
   @ReactMethod
   fun xReport(
     promise: Promise

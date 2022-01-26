@@ -24,7 +24,9 @@ import {
 
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import {
+  IRnSp811frDriverDiscountType,
   IRnSp811frDriverDocumentType,
+  IRnSp811frDriverPaymentType,
   IRnSp811frDriverVatType,
   RnSp811frDriver,
 } from 'rn-sp811fr-driver';
@@ -36,8 +38,6 @@ const items: ICoolButtonProps[] = [
     title: 'Продажа',
     onPress: async () => {
       try {
-        console.log('connect');
-
         await driver.connect({
           port: 9876,
           host: '192.168.2.150',
@@ -51,21 +51,44 @@ const items: ICoolButtonProps[] = [
         await driver.addProduct({
           articul: '00001851',
           count: 150,
-          gtin: '0000185158484',
+          gtin: '00185158484',
           nds: IRnSp811frDriverVatType.VAT_20,
           name: 'Супер товар',
           price: 150,
+        });
+        await driver.saleForDocOrProduct({
+          name: 'Скидка на сумму',
+          percentOrSum: 59,
+          type: IRnSp811frDriverDiscountType.FOR_AMOUNT,
+        });
+        await driver.addProduct({
+          articul: '00001852',
+          count: 50,
+          gtin: '00001851284',
+          nds: IRnSp811frDriverVatType.VAT_10,
+          name: 'Супер товар2',
+          price: 150,
+        });
+        await driver.saleForDocOrProduct({
+          name: 'Скидка на процент',
+          percentOrSum: 15,
+          type: IRnSp811frDriverDiscountType.PERCENT,
         });
         await driver.subTotal();
 
         await driver.setNDS();
 
         await driver.subTotal();
-
+        await driver.payment({
+          sum: 20000,
+          text: 'Денежка ',
+          type: IRnSp811frDriverPaymentType.CASH,
+        });
         await driver.closeDocument();
         await driver.disconnect();
       } catch (e) {
         console.error('Продажа', e);
+        await driver.disconnect();
       }
     },
   },
@@ -73,7 +96,6 @@ const items: ICoolButtonProps[] = [
     title: 'Отмена документа',
     onPress: async () => {
       try {
-        console.log('connect');
         await driver.connect({
           port: 9876,
           host: '192.168.2.150',
@@ -83,6 +105,7 @@ const items: ICoolButtonProps[] = [
         await driver.disconnect();
       } catch (e) {
         console.error(e);
+        await driver.disconnect();
       }
     },
   },
@@ -90,7 +113,6 @@ const items: ICoolButtonProps[] = [
     title: 'Z Отчет',
     onPress: async () => {
       try {
-        console.log('connect');
         await driver.connect({
           port: 9876,
           host: '192.168.2.150',
@@ -102,6 +124,7 @@ const items: ICoolButtonProps[] = [
         await driver.disconnect();
       } catch (e) {
         console.error(e);
+        await driver.disconnect();
       }
     },
   },
@@ -109,7 +132,6 @@ const items: ICoolButtonProps[] = [
     title: 'X Отчет',
     onPress: async () => {
       try {
-        console.log('connect');
         await driver.connect({
           port: 9876,
           host: '192.168.2.150',
@@ -121,6 +143,7 @@ const items: ICoolButtonProps[] = [
         await driver.disconnect();
       } catch (e) {
         console.error(e);
+        await driver.disconnect();
       }
     },
   },
@@ -128,7 +151,6 @@ const items: ICoolButtonProps[] = [
     title: 'Открыть денежный ящик',
     onPress: async () => {
       try {
-        console.log('connect');
         await driver.connect({
           port: 9876,
           host: '192.168.2.150',
@@ -140,6 +162,7 @@ const items: ICoolButtonProps[] = [
         await driver.disconnect();
       } catch (e) {
         console.error(e);
+        await driver.disconnect();
       }
     },
   },
@@ -147,18 +170,18 @@ const items: ICoolButtonProps[] = [
     title: 'Печать текста ',
     onPress: async () => {
       try {
-        console.log('connect');
         await driver.connect({
           port: 9876,
           host: '192.168.2.150',
           password: 'PONE',
         });
 
-        await driver.printText('Печать текста');
+        await driver.printText('Печать текста ');
 
         await driver.disconnect();
       } catch (e) {
         console.error(e);
+        await driver.disconnect();
       }
     },
   },

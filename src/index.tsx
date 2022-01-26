@@ -31,11 +31,13 @@ export enum IRnSp811frDriverDocumentType {
   WITCHDRAWAL_DOCUMENT = '5',
   OTHER = '6',
 }
+
 export enum IRnSp811frDriverVatType {
   VAT_20 = 0,
   VAT_10 = 1,
   VAT_0 = 2,
 }
+
 export interface IRnSp811frDriverProduct {
   articul: string;
   nds: IRnSp811frDriverVatType;
@@ -45,6 +47,34 @@ export interface IRnSp811frDriverProduct {
   gtin: string;
   // не реализованно
   // gtinType?: string;
+}
+
+export interface IRnSp811frDriverFrState {
+  fatal: string;
+  current: string;
+  doc: string;
+}
+
+export enum IRnSp811frDriverDiscountType {
+  PERCENT = 'p',
+  FOR_AMOUNT = 's',
+}
+
+export enum IRnSp811frDriverPaymentType {
+  CASH = 0,
+  CARD = 1,
+}
+
+export interface IRnSp811frDriverDiscountData {
+  type: IRnSp811frDriverDiscountType;
+  percentOrSum: number;
+  name: string;
+}
+
+export interface IRnSp811frDriverPaymentData {
+  type: IRnSp811frDriverPaymentType;
+  sum: number;
+  text: string;
 }
 
 export class RnSp811frDriver {
@@ -60,12 +90,26 @@ export class RnSp811frDriver {
     return Driver.openDocument(type);
   }
 
+  public payment(type: IRnSp811frDriverPaymentData): Promise<void> {
+    return Driver.payment(type);
+  }
+
   public initFR(): Promise<void> {
     return Driver.initFR();
   }
 
+  public checkFr(): Promise<IRnSp811frDriverFrState> {
+    return Driver.checkFr();
+  }
+
   public addProduct(data: IRnSp811frDriverProduct): Promise<void> {
     return Driver.addProduct(data);
+  }
+
+  public saleForDocOrProduct(
+    data: IRnSp811frDriverDiscountData
+  ): Promise<void> {
+    return Driver.saleForDocOrProduct(data);
   }
 
   public abortDocument(): Promise<void> {

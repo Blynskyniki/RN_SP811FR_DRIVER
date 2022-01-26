@@ -1,6 +1,6 @@
 {
   "name": "rn-sp811fr-driver",
-  "version": "0.1.0",
+  "version": "1.1.0",
   "description": "empty",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -22,6 +22,7 @@
     "!**/__mocks__"
   ],
   "scripts": {
+    "prepublish": "npm config set @kari:registry https://npm.kari.com; npm config set @kari-product:registry https://npm.kari.com; npm set strict-ssl false;",
     "test": "jest",
     "typescript": "tsc --noEmit",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
@@ -36,15 +37,15 @@
     "ios",
     "android"
   ],
-  "repository": "http://qq.ru",
-  "author": "BlynskyNiki <blynskijno@lad24.ru> (http://qq.ru)",
+  "repository": "https://gitlab.kari.com/development/kari/sp811fr/",
+  "author": "BlynskyNiki <blynskijno@lad24.ru> ",
   "license": "MIT",
   "bugs": {
-    "url": "http://qq.ru/issues"
+    "url": "https://gitlab.kari.com/development/kari/sp811fr/issues"
   },
-  "homepage": "http://qq.ru#readme",
+  "homepage": "https://gitlab.kari.com/development/kari/sp811fr/#readme",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://npm.kari.com"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^11.0.0",
