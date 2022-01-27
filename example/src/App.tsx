@@ -1,3 +1,10 @@
+import {
+  IRnSp811frDriverDiscountType,
+  IRnSp811frDriverDocumentType,
+  IRnSp811frDriverPaymentType,
+  IRnSp811frDriverVatType,
+  RnSp811frDriver,
+} from '@kari/rn-sp811fr-driver';
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import {
   Alert,
@@ -13,13 +20,6 @@ import {
 } from 'react-native';
 
 import { Colors } from 'react-native/Libraries/NewAppScreen';
-import {
-  IRnSp811frDriverDiscountType,
-  IRnSp811frDriverDocumentType,
-  IRnSp811frDriverPaymentType,
-  IRnSp811frDriverVatType,
-  RnSp811frDriver,
-} from 'rn-sp811fr-driver';
 
 const driver = new RnSp811frDriver();
 
@@ -451,7 +451,7 @@ const CoolButton = ({ title, onPress, ip, port }: ICoolButtonProps) => {
       />
       <TouchableOpacity
         accessibilityRole="button"
-        onPress={() => onPress(ip, +port)}
+        onPress={() => onPress(ip!, +port!)}
         style={styles.linkContainer}
       >
         <Text
@@ -478,6 +478,7 @@ const RenderItem = ({
   port: string;
 }) => {
   return (
+    // @ts-ignore
     <CoolButton title={item.title} onPress={item.onPress} ip={ip} port={port} />
   );
 };
@@ -486,6 +487,7 @@ interface IButton {
   ip: string;
   port: string;
 }
+
 const Buttons = ({ ip, port }: IButton) => {
   return (
     <FlatList
@@ -532,6 +534,7 @@ interface IPort {
   ip: string;
   port: string;
 }
+
 const IPPort = ({ onChangeTextIp, onChangeTextPort, ip, port }: IPort) => {
   const isDarkMode = useColorScheme() === 'dark';
 

@@ -8,8 +8,6 @@ npm install rn-sp811fr-driver
 ## Usage
 
 ```typescript
-import { RnSp811frDriver } from "rn-sp811fr-driver";
-
 export interface IRnSp811frDriverConnectOptions {
   host: string;
   port: number;
@@ -42,20 +40,31 @@ export interface IRnSp811frDriverFrState {
   doc: string;
 }
 export declare enum IRnSp811frDriverDiscountType {
-  PERCENT = "%",
+  PERCENT = "p",
   FOR_AMOUNT = "s"
+}
+export declare enum IRnSp811frDriverPaymentType {
+  CASH = 0,
+  CARD = 2
 }
 export interface IRnSp811frDriverDiscountData {
   type: IRnSp811frDriverDiscountType;
   percentOrSum: number;
   name: string;
 }
+export interface IRnSp811frDriverPaymentData {
+  type: IRnSp811frDriverPaymentType;
+  sum: number;
+  text: string;
+}
 export declare class RnSp811frDriver {
   connect(options: IRnSp811frDriverConnectOptions): Promise<void>;
   disconnect(): Promise<void>;
   openDocument(type: IRnSp811frDriverDocumentType): Promise<void>;
+  payment(type: IRnSp811frDriverPaymentData): Promise<void>;
   initFR(): Promise<void>;
   checkFr(): Promise<IRnSp811frDriverFrState>;
+  cashInOutOperation(cashName: string, sumOrCount: number): Promise<IRnSp811frDriverFrState>;
   addProduct(data: IRnSp811frDriverProduct): Promise<void>;
   saleForDocOrProduct(data: IRnSp811frDriverDiscountData): Promise<void>;
   abortDocument(): Promise<void>;
@@ -68,8 +77,9 @@ export declare class RnSp811frDriver {
   closeDocument(): Promise<void>;
   setNDS(): Promise<void>;
   subTotal(): Promise<void>;
+  getFrParams(row: number, column: number): Promise<string>;
+  setFrParams(row: number, column: number, value: string): Promise<void>;
 }
-
 
 
 ```
