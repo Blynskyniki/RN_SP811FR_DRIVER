@@ -62,7 +62,7 @@ export enum IRnSp811frDriverDiscountType {
 
 export enum IRnSp811frDriverPaymentType {
   CASH = 0,
-  CARD = 1,
+  CARD = 2,
 }
 
 export interface IRnSp811frDriverDiscountData {
@@ -101,6 +101,7 @@ export class RnSp811frDriver {
   public checkFr(): Promise<IRnSp811frDriverFrState> {
     return Driver.checkFr();
   }
+
   public cashInOutOperation(
     cashName: string,
     sumOrCount: number
@@ -156,5 +157,17 @@ export class RnSp811frDriver {
 
   public subTotal(): Promise<void> {
     return Driver.subTotal();
+  }
+
+  public getFrParams(row: number, column: number): Promise<string> {
+    return Driver.getFrParams(row, column);
+  }
+
+  public setFrParams(
+    row: number,
+    column: number,
+    value: string
+  ): Promise<void> {
+    return Driver.setFrParams(row, column, value);
   }
 }

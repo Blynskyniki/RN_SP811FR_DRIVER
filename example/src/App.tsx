@@ -1,17 +1,7 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * Generated with the TypeScript template
- * https://github.com/react-native-community/react-native-template-typescript
- *
- * @format
- */
-
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import {
+  Alert,
   FlatList,
-  ListRenderItemInfo,
   SafeAreaView,
   StatusBar,
   StyleSheet,
@@ -30,17 +20,23 @@ import {
   IRnSp811frDriverVatType,
   RnSp811frDriver,
 } from 'rn-sp811fr-driver';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 const driver = new RnSp811frDriver();
 
+const AlertError = (e: Error | unknown) => {
+  console.error(e);
+  Alert.alert('Ошибка', (e as Error).message, [
+    { text: 'OK', onPress: () => console.log('OK') },
+  ]);
+};
 const items: ICoolButtonProps[] = [
   {
     title: 'Продажа',
-    onPress: async () => {
+    onPress: async (host, port) => {
       try {
         await driver.connect({
-          port: 9876,
-          host: '192.168.2.150',
+          port,
+          host,
           password: 'PONE',
         });
 
@@ -87,35 +83,106 @@ const items: ICoolButtonProps[] = [
         await driver.closeDocument();
         await driver.disconnect();
       } catch (e) {
-        console.error('Продажа', e);
+        AlertError(e);
         await driver.disconnect();
       }
     },
   },
   {
-    title: 'Отмена документа',
-    onPress: async () => {
+    title: 'Возврат',
+    onPress: async (host, port) => {
       try {
         await driver.connect({
-          port: 9876,
-          host: '192.168.2.150',
+          port,
+          host,
+          password: 'PONE',
+        });
+
+        await driver.initFR();
+
+        await driver.openDocument(IRnSp811frDriverDocumentType.REFUND_DOCUMENT);
+
+        await driver.addProduct({
+          articul: '00001851',
+          count: 150,
+          gtin: '00185158484',
+          nds: IRnSp811frDriverVatType.VAT_20,
+          name: 'Супер товар',
+          price: 150,
+        });
+
+        await driver.subTotal();
+
+        await driver.setNDS();
+
+        await driver.subTotal();
+        await driver.payment({
+          sum: 20000,
+          text: 'Денежка ',
+          type: IRnSp811frDriverPaymentType.CASH,
+        });
+        await driver.closeDocument();
+        await driver.disconnect();
+      } catch (e) {
+        console.error('Отмена', e);
+        await driver.disconnect();
+      }
+    },
+  },
+  {
+    title: 'Недоделанный чек',
+    onPress: async (host, port) => {
+      try {
+        await driver.connect({
+          port,
+          host,
+          password: 'PONE',
+        });
+
+        await driver.initFR();
+
+        await driver.openDocument(IRnSp811frDriverDocumentType.SALE_DOCUMENT);
+
+        await driver.addProduct({
+          articul: '00001851',
+          count: 150,
+          gtin: '00185158484',
+          nds: IRnSp811frDriverVatType.VAT_20,
+          name: 'Супер товар',
+          price: 150,
+        });
+
+        await driver.disconnect();
+      } catch (e) {
+        AlertError(e);
+        await driver.disconnect();
+      }
+    },
+  },
+  {
+    title: 'Отмена документа (чек завис)',
+    onPress: async (host, port) => {
+      try {
+        await driver.connect({
+          port,
+          host,
           password: 'PONE',
         });
         await driver.abortDocument();
         await driver.disconnect();
       } catch (e) {
-        console.error(e);
+        AlertError(e);
         await driver.disconnect();
       }
     },
   },
   {
     title: 'Z Отчет',
-    onPress: async () => {
+    onPress: async (host, port) => {
       try {
         await driver.connect({
-          port: 9876,
-          host: '192.168.2.150',
+          port,
+          host,
           password: 'PONE',
         });
         await driver.initFR();
@@ -123,18 +190,18 @@ const items: ICoolButtonProps[] = [
         await driver.zReport();
         await driver.disconnect();
       } catch (e) {
-        console.error(e);
+        AlertError(e);
         await driver.disconnect();
       }
     },
   },
   {
     title: 'X Отчет',
-    onPress: async () => {
+    onPress: async (host, port) => {
       try {
         await driver.connect({
-          port: 9876,
-          host: '192.168.2.150',
+          port,
+          host,
           password: 'PONE',
         });
         await driver.initFR();
@@ -142,18 +209,18 @@ const items: ICoolButtonProps[] = [
         await driver.xReport();
         await driver.disconnect();
       } catch (e) {
-        console.error(e);
+        AlertError(e);
         await driver.disconnect();
       }
     },
   },
   {
     title: 'Открыть денежный ящик',
-    onPress: async () => {
+    onPress: async (host, port) => {
       try {
         await driver.connect({
-          port: 9876,
-          host: '192.168.2.150',
+          port,
+          host,
           password: 'PONE',
         });
 
@@ -161,18 +228,18 @@ const items: ICoolButtonProps[] = [
 
         await driver.disconnect();
       } catch (e) {
-        console.error(e);
+        AlertError(e);
         await driver.disconnect();
       }
     },
   },
   {
     title: 'Печать текста ',
-    onPress: async () => {
+    onPress: async (host, port) => {
       try {
         await driver.connect({
-          port: 9876,
-          host: '192.168.2.150',
+          port,
+          host,
           password: 'PONE',
         });
 
@@ -180,18 +247,104 @@ const items: ICoolButtonProps[] = [
 
         await driver.disconnect();
       } catch (e) {
-        console.error(e);
+        AlertError(e);
         await driver.disconnect();
       }
     },
   },
   {
     title: 'Инкасация ',
-    onPress: async () => {
+    onPress: async (host, port) => {
       try {
         await driver.connect({
-          port: 9876,
-          host: '192.168.2.150',
+          port,
+          host,
+          password: 'PONE',
+        });
+
+        await driver.openDocument(
+          IRnSp811frDriverDocumentType.WITCHDRAWAL_DOCUMENT
+        );
+        await driver.cashInOutOperation('Купюры по 5К', 100);
+        await driver.closeDocument();
+
+        await driver.disconnect();
+      } catch (e) {
+        AlertError(e);
+        await driver.disconnect();
+      }
+    },
+  },
+  {
+    title: 'Отложить чек ',
+    onPress: async (host, port) => {
+      try {
+        await driver.connect({
+          port,
+          host,
+          password: 'PONE',
+        });
+
+        await driver.holdCheck();
+
+        await driver.disconnect();
+      } catch (e) {
+        AlertError(e);
+        await driver.disconnect();
+      }
+    },
+  },
+  {
+    title: 'Копия чека ',
+    onPress: async (host, port) => {
+      try {
+        await driver.connect({
+          port,
+          host,
+          password: 'PONE',
+        });
+
+        await driver.printCopyCheck();
+
+        await driver.disconnect();
+      } catch (e) {
+        AlertError(e);
+        await driver.disconnect();
+      }
+    },
+  },
+  {
+    title: 'Проверка состояния фискального регистратора ',
+    onPress: async (host, port) => {
+      try {
+        await driver.connect({
+          port,
+          host,
+          password: 'PONE',
+        });
+
+        const res = await driver.checkFr();
+        Alert.alert(
+          'Проверка состояния фискального регистратора',
+          JSON.stringify(res),
+          [{ text: 'OK', onPress: () => console.log('OK Pressed') }]
+        );
+        console.log('Проверка состояния фискального регистратора ', res);
+
+        await driver.disconnect();
+      } catch (e) {
+        AlertError(e);
+        await driver.disconnect();
+      }
+    },
+  },
+  {
+    title: 'Пополнение кассы ',
+    onPress: async (host, port) => {
+      try {
+        await driver.connect({
+          port,
+          host,
           password: 'PONE',
         });
 
@@ -203,7 +356,72 @@ const items: ICoolButtonProps[] = [
 
         await driver.disconnect();
       } catch (e) {
-        console.error(e);
+        AlertError(e);
+        await driver.disconnect();
+      }
+    },
+  },
+  {
+    title: 'Считать настройки ндс',
+    onPress: async (host, port) => {
+      try {
+        await driver.connect({
+          port,
+          host,
+          password: 'PONE',
+        });
+
+        await driver.initFR();
+        const res = await driver.getFrParams(12, 0);
+        Alert.alert('Настройки ндс', JSON.stringify(res), [
+          { text: 'OK', onPress: () => console.log('OK Pressed') },
+        ]);
+        await driver.disconnect();
+      } catch (e) {
+        AlertError(e);
+        await driver.disconnect();
+      }
+    },
+  },
+  {
+    title: 'Настроить печать НДС',
+    onPress: async (host, port) => {
+      try {
+        await driver.connect({
+          port,
+          host,
+          password: 'PONE',
+        });
+
+        await driver.initFR();
+        await driver.zReport();
+        await driver.setFrParams(12, 0, '31');
+
+        await driver.disconnect();
+      } catch (e) {
+        AlertError(e);
+        await driver.disconnect();
+      }
+    },
+  },
+  {
+    title: 'Настроить Типы оплат',
+    onPress: async (host, port) => {
+      try {
+        await driver.connect({
+          port,
+          host,
+          password: 'PONE',
+        });
+
+        await driver.initFR();
+        await driver.zReport();
+        await driver.setFrParams(22, 2, 'БАНКОВСКАЯ КАРТА');
+        await driver.setFrParams(22, 1, 'НАЛИЧНЫЕ');
+
+        await driver.disconnect();
+      } catch (e) {
+        AlertError(e);
         await driver.disconnect();
       }
     },
@@ -212,10 +430,12 @@ const items: ICoolButtonProps[] = [
 
 interface ICoolButtonProps {
   title: string;
-  onPress: () => void;
+  onPress: (host: string, port: number) => void;
+  ip?: string;
+  port?: number;
 }
 
-const CoolButton = ({ title, onPress }: ICoolButtonProps) => {
+const CoolButton = ({ title, onPress, ip, port }: ICoolButtonProps) => {
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
@@ -224,20 +444,21 @@ const CoolButton = ({ title, onPress }: ICoolButtonProps) => {
         style={[
           styles.separator,
           {
+            marginVertical: 5,
             backgroundColor: isDarkMode ? Colors.dark : Colors.light,
           },
         ]}
       />
       <TouchableOpacity
         accessibilityRole="button"
-        onPress={onPress}
+        onPress={() => onPress(ip, +port)}
         style={styles.linkContainer}
       >
         <Text
           style={[
             styles.description,
             {
-              color: Colors.dark,
+              color: Colors.white,
             },
           ]}
         >
@@ -247,18 +468,34 @@ const CoolButton = ({ title, onPress }: ICoolButtonProps) => {
     </View>
   );
 };
-const renderItem = ({
-  item: { title, onPress },
-}: ListRenderItemInfo<ICoolButtonProps>) => {
-  return <CoolButton title={title} onPress={onPress} />;
+const RenderItem = ({
+  item,
+  ip,
+  port,
+}: {
+  item: ICoolButtonProps;
+  ip: string;
+  port: string;
+}) => {
+  return (
+    <CoolButton title={item.title} onPress={item.onPress} ip={ip} port={port} />
+  );
 };
 
-const Biba = () => {
+interface IButton {
+  ip: string;
+  port: string;
+}
+const Buttons = ({ ip, port }: IButton) => {
   return (
     <FlatList
       data={items}
-      renderItem={renderItem}
+      renderItem={({ item }) => {
+        return <RenderItem item={item} ip={ip} port={port} />;
+      }}
       keyExtractor={(_, key) => key.toString()}
+      style={{ flex: 1 }}
+      showsVerticalScrollIndicator={false}
     />
   );
 };
@@ -271,52 +508,74 @@ interface IInputWithLabel {
 
 const InputWithLabel = ({ title, value, onChangeText }: IInputWithLabel) => {
   return (
-    <View style={styles.input}>
+    <View>
+      <Text style={{ color: Colors.primary }}>{title}</Text>
       <TextInput
         placeholder={title}
         onChangeText={onChangeText}
         value={value}
+        style={[
+          styles.input,
+          {
+            borderBottomWidth: 2,
+            borderColor: Colors.primary,
+          },
+        ]}
       />
     </View>
   );
 };
 
-const IPPort = () => {
+interface IPort {
+  onChangeTextIp: Dispatch<SetStateAction<string>>;
+  onChangeTextPort: Dispatch<SetStateAction<string>>;
+  ip: string;
+  port: string;
+}
+const IPPort = ({ onChangeTextIp, onChangeTextPort, ip, port }: IPort) => {
   const isDarkMode = useColorScheme() === 'dark';
-
-  const [ip, setIP] = useState('192.168.2.150');
-  const [port, setPort] = useState('9876');
 
   return (
     <View>
-      <InputWithLabel value={ip} onChangeText={setIP} title={'IP'} />
-      <InputWithLabel value={port} onChangeText={setPort} title={'PORT'} />
+      <InputWithLabel value={ip} onChangeText={onChangeTextIp} title={'IP'} />
+      <InputWithLabel
+        value={port}
+        onChangeText={onChangeTextPort}
+        title={'PORT'}
+      />
       <View
         style={[
-          styles.separator,
           {
             backgroundColor: isDarkMode ? Colors.dark : Colors.light,
           },
         ]}
       />
-      <Text> Настройки: </Text>
+      <Text style={{ paddingVertical: 5 }}> Настройки: </Text>
     </View>
   );
 };
 
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
+  const [ip, setIP] = useState('192.168.2.150');
+  const [port, setPort] = useState('9876');
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
     padding: 10,
+    flex: 1,
   };
 
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <IPPort />
-      <Biba />
+      <IPPort
+        onChangeTextPort={setPort}
+        onChangeTextIp={setIP}
+        port={port}
+        ip={ip}
+      />
+      <Buttons ip={ip} port={port} />
     </SafeAreaView>
   );
 };
@@ -325,20 +584,22 @@ const styles = StyleSheet.create({
   container: {},
   linkContainer: {
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 5,
+    borderRadius: 10,
+    backgroundColor: 'rgba(3,125,152,0.65)',
   },
   description: {
-    paddingVertical: 16,
+    paddingVertical: 10,
     fontWeight: '400',
     fontSize: 18,
+    textAlign: 'center',
   },
   margin: {},
   input: {
     padding: 2,
+    marginBottom: 5,
   },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-  },
+  separator: {},
 });
 
 export default App;

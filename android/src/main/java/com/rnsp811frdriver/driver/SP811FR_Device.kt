@@ -377,7 +377,7 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
 
   }
 
-  fun setFrParams(row: Int, column: Int, value: String) {
+  fun setFrParams(row: Int, column: Int, value: String): Response {
     var params = byteArrayOf()
     params += row.toString().toByteArray()
     params += Constants.FS
@@ -392,7 +392,7 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
     )
     Log.d("SP811", "SET_FR_PARAMS  ${res.errorMsg}")
 
-
+    return res
   }
 
   fun cashInOutOperation(cashName: String, summOrCount: Int): Response {

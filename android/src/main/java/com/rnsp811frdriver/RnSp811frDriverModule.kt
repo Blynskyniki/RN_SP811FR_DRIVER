@@ -114,6 +114,7 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
 
 
   }
+
   @ReactMethod
   fun payment(
     data: ReadableMap,
@@ -123,7 +124,7 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
     val sum = data.getInt("sum")
     val text = data.getString("text")!!
     this.useNewTread(promise) {
-      val res = this.driver?.payment(type,sum,text)
+      val res = this.driver?.payment(type, sum, text)
       if (res?.isError == true) {
         promise.reject(java.lang.Exception(res.errorMsg))
       } else {
@@ -133,15 +134,16 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
 
 
   }
+
   @ReactMethod
   fun cashInOutOperation(
-    name:String,
-    sumOrCount:Int,
+    name: String,
+    sumOrCount: Int,
     promise: Promise
   ) {
 
     this.useNewTread(promise) {
-      val res = this.driver?.cashInOutOperation(name,sumOrCount)
+      val res = this.driver?.cashInOutOperation(name, sumOrCount)
       if (res?.isError == true) {
         promise.reject(java.lang.Exception(res.errorMsg))
       } else {
@@ -151,6 +153,7 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
 
 
   }
+
   @ReactMethod
   fun saleForDocOrProduct(
     data: ReadableMap,
@@ -347,6 +350,35 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
       } else {
         promise.resolve(Arguments.createMap())
       }
+    }
+
+
+  }
+
+  @ReactMethod
+  fun setFrParams(
+    row: Int, column: Int, value: String,
+    promise: Promise
+  ) {
+    this.useNewTread(promise) {
+      val res = this.driver?.setFrParams(row, column, value)
+      if (res?.isError == true) {
+        promise.reject(java.lang.Exception(res.errorMsg))
+      } else {
+        promise.resolve(Arguments.createMap())
+      }
+    }
+
+
+  }
+  @ReactMethod
+  fun getFrParams(
+    row: Int, column: Int,
+    promise: Promise
+  ) {
+    this.useNewTread(promise) {
+      val res = this.driver?.getFrParams(row, column)
+      promise.resolve(res)
     }
 
 
