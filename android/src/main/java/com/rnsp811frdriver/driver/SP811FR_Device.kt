@@ -395,7 +395,7 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
 
   }
 
-  fun cashInOutOperation(cashName: String, summOrCount: Int) {
+  fun cashInOutOperation(cashName: String, summOrCount: Int): Response {
     var params = byteArrayOf()
 
     params += charsetEncoder.encode(cashName).toByteArray()
@@ -409,7 +409,7 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
     )
     Log.d("SP811", "CASH_OPERATION  ${res.errorMsg}")
 
-
+    return res
   }
 
   fun payment(type: Int, summOrCount: Int, text: String): Response {

@@ -133,7 +133,24 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
 
 
   }
+  @ReactMethod
+  fun cashInOutOperation(
+    name:String,
+    sumOrCount:Int,
+    promise: Promise
+  ) {
 
+    this.useNewTread(promise) {
+      val res = this.driver?.cashInOutOperation(name,sumOrCount)
+      if (res?.isError == true) {
+        promise.reject(java.lang.Exception(res.errorMsg))
+      } else {
+        promise.resolve(Arguments.createMap())
+      }
+    }
+
+
+  }
   @ReactMethod
   fun saleForDocOrProduct(
     data: ReadableMap,

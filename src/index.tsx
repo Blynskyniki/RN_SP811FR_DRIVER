@@ -101,6 +101,12 @@ export class RnSp811frDriver {
   public checkFr(): Promise<IRnSp811frDriverFrState> {
     return Driver.checkFr();
   }
+  public cashInOutOperation(
+    cashName: string,
+    sumOrCount: number
+  ): Promise<IRnSp811frDriverFrState> {
+    return Driver.cashInOutOperation(cashName, sumOrCount);
+  }
 
   public addProduct(data: IRnSp811frDriverProduct): Promise<void> {
     return Driver.addProduct(data);

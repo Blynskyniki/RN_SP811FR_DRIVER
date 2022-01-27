@@ -185,6 +185,29 @@ const items: ICoolButtonProps[] = [
       }
     },
   },
+  {
+    title: 'Инкасация ',
+    onPress: async () => {
+      try {
+        await driver.connect({
+          port: 9876,
+          host: '192.168.2.150',
+          password: 'PONE',
+        });
+
+        await driver.openDocument(
+          IRnSp811frDriverDocumentType.DEPOSITING_DOCUMENT
+        );
+        await driver.cashInOutOperation('Купюры по 5К', 100);
+        await driver.closeDocument();
+
+        await driver.disconnect();
+      } catch (e) {
+        console.error(e);
+        await driver.disconnect();
+      }
+    },
+  },
 ];
 
 interface ICoolButtonProps {
