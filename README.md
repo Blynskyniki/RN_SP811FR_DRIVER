@@ -2,7 +2,7 @@
 ## Installation
 
 ```sh
-npm install rn-sp811fr-driver
+npm install rn-sp811fr-driver-kkt
 ```
 
 ## Usage
