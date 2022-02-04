@@ -1,10 +1,3 @@
-import {
-  IRnSp811frDriverDiscountType,
-  IRnSp811frDriverDocumentType,
-  IRnSp811frDriverPaymentType,
-  IRnSp811frDriverVatType,
-  RnSp811frDriver,
-} from '@kari/rn-sp811fr-driver';
 import React, { Dispatch, SetStateAction, useState } from 'react';
 import {
   Alert,
@@ -20,6 +13,13 @@ import {
 } from 'react-native';
 
 import { Colors } from 'react-native/Libraries/NewAppScreen';
+import {
+  IRnSp811frDriverDiscountType,
+  IRnSp811frDriverDocumentType,
+  IRnSp811frDriverPaymentType,
+  IRnSp811frDriverVatType,
+  RnSp811frDriver,
+} from 'rn-sp811fr-driver-kkt';
 
 const driver = new RnSp811frDriver();
 
