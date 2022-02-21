@@ -170,4 +170,34 @@ export class RnSp811frDriver {
   ): Promise<void> {
     return Driver.setFrParams(row, column, value);
   }
+  // Для русского текста в параметрах
+  public setFrParamCyr(
+    row: number,
+    column: number,
+    value: string
+  ): Promise<void> {
+    return Driver.setFrParamCyr(row, column, value);
+  }
+
+  public setHeaderImage(url: string): Promise<void> {
+    return Driver.setHeader(url);
+  }
+
+  public rmHeaderImage(): Promise<void> {
+    return Driver.rmHeader();
+  }
+
+  public setFooterTxt(data: string[]): Promise<void> {
+    if (data.length > 2) {
+      throw new Error('Верхнее клише может принять максимум 2 строки');
+    }
+    return Driver.setFooterTxt(data);
+  }
+
+  public setHeaderTxt(data: string[]): Promise<void> {
+    if (data.length > 4) {
+      throw new Error('Верхнее клише может принять максимум 4 строки');
+    }
+    return Driver.setHeaderTxt(data);
+  }
 }

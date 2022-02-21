@@ -24,6 +24,9 @@ class Commands {
         const val SET_FR_PARAMS = 0xA2.toByte()
         const val CASH_OPERATION = 0x36.toByte()
         const val PAYMENT_OPERATION = 0x35.toByte()
+        const val SET_HEADER = 0xE2.toByte()
+        const val RM_HEADER = 0xE3.toByte()
+
 
     }
 }

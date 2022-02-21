@@ -17,13 +17,19 @@ class Transport(private val host: String, private val port: Int) {
         client?.connect(InetSocketAddress(this.host, this.port), 1000)
     }
 
-    fun sendCommandAndReceiveResponse(command: CommandGenerator): Response {
-        client?.getOutputStream()?.write(command.build())
-        val headMessage = ByteArray(DEFAULT_BUFFER_SIZE)
-        val len = client?.getInputStream()?.read(headMessage)
-        val res = Response(calculateArray(len!!, headMessage))
-        return res
-    }
+  fun sendCommandAndReceiveResponse(command: CommandGenerator): Response {
+    client?.getOutputStream()?.write(command.build())
+    val headMessage = ByteArray(DEFAULT_BUFFER_SIZE)
+    val len = client?.getInputStream()?.read(headMessage)
+    val res = Response(calculateArray(len!!, headMessage))
+    return res
+  }
+  fun sendCommandAndReceiveResponse(command: ByteArray): ByteArray {
+    client?.getOutputStream()?.write(command)
+    val headMessage = ByteArray(DEFAULT_BUFFER_SIZE)
+    val len = client?.getInputStream()?.read(headMessage)
+    return calculateArray(len!!, headMessage)
+  }
 
     fun closeConnection() {
         client?.close()

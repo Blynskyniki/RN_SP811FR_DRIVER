@@ -43,6 +43,8 @@ const items: ICoolButtonProps[] = [
         await driver.initFR();
 
         await driver.openDocument(IRnSp811frDriverDocumentType.SALE_DOCUMENT);
+        // сюда добавлять текст из заголовка
+        await driver.printText('Заголовок, тут могла бы быть ваша реклама');
 
         await driver.addProduct({
           articul: '00001851',
@@ -50,7 +52,7 @@ const items: ICoolButtonProps[] = [
           gtin: '00185158484',
           nds: IRnSp811frDriverVatType.VAT_20,
           name: 'Супер товар',
-          price: 150,
+          price: 0.35,
         });
         await driver.saleForDocOrProduct({
           name: 'Скидка на сумму',
@@ -59,7 +61,7 @@ const items: ICoolButtonProps[] = [
         });
         await driver.addProduct({
           articul: '00001852',
-          count: 50,
+          count: 50.5,
           gtin: '00001851284',
           nds: IRnSp811frDriverVatType.VAT_10,
           name: 'Супер товар2',
@@ -80,6 +82,10 @@ const items: ICoolButtonProps[] = [
           text: 'Денежка ',
           type: IRnSp811frDriverPaymentType.CASH,
         });
+        // сюда добавлять текст из подвала
+
+        await driver.printText('Подвал, тут могла бы быть ваша реклама');
+
         await driver.closeDocument();
         await driver.disconnect();
       } catch (e) {
@@ -383,6 +389,7 @@ const items: ICoolButtonProps[] = [
       }
     },
   },
+
   {
     title: 'Настроить печать НДС',
     onPress: async (host, port) => {
@@ -395,7 +402,7 @@ const items: ICoolButtonProps[] = [
 
         await driver.initFR();
         await driver.zReport();
-        await driver.setFrParams(12, 0, '31');
+        await driver.setFrParams(12, 0, '30');
 
         await driver.disconnect();
       } catch (e) {
@@ -416,9 +423,60 @@ const items: ICoolButtonProps[] = [
 
         await driver.initFR();
         await driver.zReport();
-        await driver.setFrParams(22, 2, 'БАНКОВСКАЯ КАРТА');
-        await driver.setFrParams(22, 1, 'НАЛИЧНЫЕ');
+        await driver.setFrParamCyr(22, 2, 'БАНКОВСКАЯ КАРТА');
+        await driver.setFrParamCyr(22, 1, 'НАЛИЧНЫЕ');
 
+        await driver.disconnect();
+      } catch (e) {
+        AlertError(e);
+        await driver.disconnect();
+      }
+    },
+  },
+  {
+    title: 'Настроить Клише (Картинка)',
+    onPress: async (host, port) => {
+      try {
+        await driver.connect({
+          port,
+          host,
+          password: 'PONE',
+        });
+
+        // Включить заголовок (Достаточно 1 раз сделать)
+        await driver.setFrParams(5, 0, '1');
+        // await driver.setHeaderImage(
+        //   'https://cdn.api.kari.com/f/SP801_Logo_ServPlus_koordinats.bmp'
+        // );
+        // Проверка ошибки размера картинки
+        await driver.setHeaderImage('https://cdn.api.kari.com/f/logotype.bmp');
+
+        await driver.disconnect();
+      } catch (e) {
+        AlertError(e);
+        await driver.disconnect();
+      }
+    },
+  },
+  {
+    title: 'Установить верхнее и нижнее Клише',
+    onPress: async (host, port) => {
+      try {
+        await driver.connect({
+          port,
+          host,
+          password: 'PONE',
+        });
+
+        await driver.setHeaderTxt([
+          'Строка 1',
+          'Строка 2',
+          'Строка 3',
+          'Строка 4',
+        ]);
+        await driver.initFR();
+        await driver.setFooterTxt(['Строка 1', 'Строка 2']);
+        await driver.initFR();
         await driver.disconnect();
       } catch (e) {
         AlertError(e);
@@ -560,7 +618,7 @@ const IPPort = ({ onChangeTextIp, onChangeTextPort, ip, port }: IPort) => {
 
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
-  const [ip, setIP] = useState('192.168.2.150');
+  const [ip, setIP] = useState('192.168.3.106');
   const [port, setPort] = useState('9876');
 
   const backgroundStyle = {

@@ -48,6 +48,7 @@ class CommandGenerator(private val password:String = "PONE") {
         return this
     }
 
+
     fun build(): ByteArray {
         var command = byteArrayOf()
         command = command.plus(Constants.PWD)

@@ -1,5 +1,6 @@
 package com.rnsp811frdriver
 
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.util.Log
 import com.facebook.react.bridge.Arguments
@@ -9,10 +10,17 @@ import com.rnsp811frdriver.driver.utils.Utils
 import com.rnsp811frdriver.utils.*
 import com.rnsp811frdriver.utils.constants.Commands
 import com.rnsp811frdriver.utils.constants.Constants
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.lang.Exception
+import java.net.HttpURLConnection
+import java.net.MalformedURLException
+import java.net.URL
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
 
 class SP811FR_Device(private val transport: Transport, private val password: String) {
   private val charsetEncoder: Charset = Charset.forName("Cp866")
@@ -78,6 +86,81 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
 
   }
 
+  private fun getByteArrayImage(imageUrl: String): ByteArray? {
+    var url: URL? = null
+    try {
+      url = URL(imageUrl)
+    } catch (e: MalformedURLException) {
+      e.printStackTrace()
+    }
+    val outputStream = ByteArrayOutputStream()
+    try {
+      val chunk = ByteArray(4096)
+      var bytesRead: Int
+      val stream = url!!.openStream()
+      while (stream.read(chunk).also { bytesRead = it } > 0) {
+        outputStream.write(chunk, 0, bytesRead)
+      }
+      url.openStream().close()
+    } catch (e: IOException) {
+      e.printStackTrace()
+      return null
+    }
+    return outputStream.toByteArray()
+  }
+
+
+  // Печать заголовка для нового документа
+  fun setHeader(url: String): Response? {
+    this.getByteArrayImage(url)?.let { image ->
+      Log.d("SP811", "setHeader size : ${image.size}")
+      var size = image.size
+      if(size > 3700){
+        throw Exception("Размер логотипа должен быть не более 3,6 кб. Размер 288x100")
+      }
+      var res = requestWrapper(
+        CommandGenerator(this.password).addCommand(
+          Commands.SET_HEADER,
+          size.toString().toByteArray(),
+
+          ).build()
+      )
+      Log.d("SP811", "Constants.ACK =  : ${Utils.getHexString(res)}")
+      if (res[0] == Constants.ACK) {
+
+        var imageData = byteArrayOf(0x1B)
+        imageData += image
+
+        val res2 = requestWrapper(
+          imageData
+        )
+
+        Log.d("SP811", "setHeader  data: " + Response(res2).errorMsg)
+
+        return Response(res2)
+
+      } else {
+        Log.d("SP811", "setHeader  data: " + Response(res).errorMsg)
+        return Response(res)
+      }
+
+    }
+    return null
+  }
+
+  // Удалить заголовка для нового документа
+  fun rmHeader(): Response {
+    val res = requestWrapper(
+      CommandGenerator(this.password).addCommand(
+        Commands.RM_HEADER,
+        byteArrayOf()
+      )
+    )
+    Log.d("SP811", "RM_HEADER : " + res.errorMsg)
+
+    return res
+  }
+
   // Аннулировать документ
   fun abortDocument(): Response {
 
@@ -91,6 +174,36 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
     Log.d("SP811", "ABORT_DOCUMENT : " + res.errorMsg)
 
     return res
+
+  }
+
+  // Верхнее клише
+  fun setHeaderTxt(data: ReadableArray) {
+//     Зануляем заголовок
+    this.setFrParams(20, 0, "")
+    this.setFrParams(20, 1, "")
+    this.setFrParams(20, 2, "")
+    this.setFrParams(20, 3, "")
+
+    for (i in 0 until data.size()) {
+      val res =
+        this.setFrParams(20, i, charsetEncoder.encode(data.getString(i).orEmpty()).toByteArray())
+      Log.d("SP811", "SET_HEADER_TXT $i : " + res.errorMsg)
+    }
+
+  }
+
+  // Нижнее клише
+  fun setFooterTxt(data: ReadableArray) {
+//     Зануляем заголовок
+    this.setFrParams(21, 0, "")
+    this.setFrParams(21, 1, "")
+
+    for (i in 0 until data.size()) {
+      val res =
+        this.setFrParams(20, i, charsetEncoder.encode(data.getString(i).orEmpty()).toByteArray())
+      Log.d("SP811", "SET_FOOTER_TXT $i : " + res.errorMsg)
+    }
 
   }
 
@@ -125,7 +238,7 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
       )
     )
 
-    Log.e("SP811", "DISCOUNT : " + res.errorMsg)
+    Log.d("SP811", "DISCOUNT : " + res.errorMsg)
 
     return res
   }
@@ -284,6 +397,8 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
     params += product.count.toString().toByteArray()
     params += Constants.FS
 //           цена
+    Log.d("SP811", "ADD_PRODUCT PRICE  : ${product.price.toString()}")
+
     params += product.price.toString().toByteArray()
     params += Constants.FS
 //          товарной группы
@@ -395,6 +510,24 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
     return res
   }
 
+  fun setFrParams(row: Int, column: Int, value: ByteArray): Response {
+    var params = byteArrayOf()
+    params += row.toString().toByteArray()
+    params += Constants.FS
+    params += column.toString().toByteArray()
+    params += Constants.FS
+    params += value
+    val res = requestWrapper(
+      CommandGenerator(this.password).addCommand(
+        Commands.SET_FR_PARAMS,
+        params
+      )
+    )
+    Log.d("SP811", "SET_FR_PARAMS  ${res.errorMsg}")
+
+    return res
+  }
+
   fun cashInOutOperation(cashName: String, summOrCount: Int): Response {
     var params = byteArrayOf()
 
@@ -434,9 +567,13 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
     return this.transport.sendCommandAndReceiveResponse(command)
   }
 
+  private fun requestWrapper(command: ByteArray): ByteArray {
+    return this.transport.sendCommandAndReceiveResponse(command)
+  }
+
 }
 
-private fun ByteBuffer.toByteArray(): ByteArray {
+fun ByteBuffer.toByteArray(): ByteArray {
   val byteArray = ByteArray(this.capacity())
   this.get(byteArray)
   return byteArray

@@ -6,9 +6,9 @@ import java.nio.charset.Charset
 class Product(
   val articul: String,
   val nds: Number,
-  val price: Number,
+  val price: Double,
   val name: String,
-  val count: Number,
+  val count: Double,
   val gtin: String,
   val gtinType: String = "",
 
@@ -18,9 +18,9 @@ class Product(
     fun fromReadableMap(data: ReadableMap): Product {
       val articul = data.getString("articul")!!
       val nds = data.getInt("nds")
-      val price = data.getInt("price")
+      val price = data.getDouble("price")
       val name = data.getString("name")!!
-      val count = data.getInt("count")
+      val count = data.getDouble("count")
       val gtin = data.getString("gtin")!!
       return Product(articul, nds, price, name, count, gtin)
     }

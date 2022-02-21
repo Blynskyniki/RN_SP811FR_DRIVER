@@ -3,11 +3,13 @@ package com.rnsp811frdriver
 import android.util.Log
 import com.facebook.react.bridge.*
 import com.rnsp811frdriver.utils.*
+import java.nio.charset.Charset
 
 class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
   private var driver: SP811FR_Device? = null;
   private var transport: Transport? = null;
+  private var charsetEncoder: Charset = Charset.forName("Cp866")
   override fun getName(): String {
     return "RnSp811frDriver"
   }
@@ -79,6 +81,42 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
 //    }
 
 
+  }
+
+  @ReactMethod
+  fun setHeader(
+    url: String,
+    promise: Promise
+  ) {
+    this.useNewTread(promise) {
+      try {
+        val res = this.driver?.setHeader(url)
+        if(res !== null){
+          if(res.isError){
+            promise.reject(java.lang.Exception(res.errorMsg))
+          }
+        }
+        promise.resolve(Arguments.createMap())
+      }catch (e:Exception){
+        promise.reject(java.lang.Exception(e.message))
+      }
+
+    }
+  }
+
+  @ReactMethod
+  fun rmHeader(
+    promise: Promise
+  ) {
+    this.useNewTread(promise) {
+      val res = this.driver?.rmHeader()
+      if (res?.isError == true) {
+        promise.reject(java.lang.Exception(res.errorMsg))
+      } else {
+        promise.resolve(Arguments.createMap())
+      }
+      promise.resolve(Arguments.createMap())
+    }
   }
 
   @ReactMethod
@@ -356,6 +394,28 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun setHeaderTxt(
+    data: ReadableArray,
+    promise: Promise
+  ) {
+
+    this.driver?.setHeaderTxt(data)
+    promise.resolve(Arguments.createMap())
+
+  }
+
+  @ReactMethod
+  fun setFooterTxt(
+    data: ReadableArray,
+    promise: Promise
+  ) {
+
+    this.driver?.setFooterTxt(data)
+    promise.resolve(Arguments.createMap())
+
+  }
+
+  @ReactMethod
   fun setFrParams(
     row: Int, column: Int, value: String,
     promise: Promise
@@ -371,6 +431,24 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
 
 
   }
+
+  @ReactMethod
+  fun setFrParamCyr(
+    row: Int, column: Int, value: String,
+    promise: Promise
+  ) {
+    this.useNewTread(promise) {
+      val res = this.driver?.setFrParams(row, column, this.charsetEncoder.encode(value).toByteArray())
+      if (res?.isError == true) {
+        promise.reject(java.lang.Exception(res.errorMsg))
+      } else {
+        promise.resolve(Arguments.createMap())
+      }
+    }
+
+
+  }
+
   @ReactMethod
   fun getFrParams(
     row: Int, column: Int,
