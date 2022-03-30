@@ -26,6 +26,7 @@ class Commands {
         const val PAYMENT_OPERATION = 0x35.toByte()
         const val SET_HEADER = 0xE2.toByte()
         const val RM_HEADER = 0xE3.toByte()
+        const val GET_STATUS = 0xA5.toByte()
 
 
     }

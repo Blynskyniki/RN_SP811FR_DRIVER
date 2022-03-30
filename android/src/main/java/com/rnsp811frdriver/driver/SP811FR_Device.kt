@@ -1,6 +1,5 @@
 package com.rnsp811frdriver
 
-import android.graphics.BitmapFactory
 import android.os.Build
 import android.util.Log
 import com.facebook.react.bridge.Arguments
@@ -12,8 +11,6 @@ import com.rnsp811frdriver.utils.constants.Commands
 import com.rnsp811frdriver.utils.constants.Constants
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.lang.Exception
-import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
 import java.nio.ByteBuffer
@@ -56,6 +53,33 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
     Log.d("SP811", "OPEN_DOCUMENT : " + res.errorMsg)
 
     return res
+  }
+
+
+  //  Статус смены
+  fun getData(
+    type: Number = 1,
+  ): String {
+    var params = byteArrayOf()
+
+//      тип операции 1-21 (см доку)
+    params += type.toString().toByteArray()
+
+    val res = requestWrapper(
+      CommandGenerator(this.password).addCommand(
+        Commands.GET_STATUS,
+        params
+      )
+    )
+    Log.d("SP811", "GET_STATUS : " + res.errorMsg)
+    if (res.isError) {
+
+      throw Exception(res.errorMsg)
+    }
+    Log.d("SP811", "GET_STATUS PAYLOAD: " + res.PAYLOAD)
+    Log.d("SP811", "GET_STATUS PAYLOAD: " + res.clearedPayload.toString(Charsets.UTF_8))
+    return res.clearedPayload.toString(Charsets.UTF_8)
+
   }
 
   // Закрыть доумент (распечатать чек)
@@ -115,7 +139,7 @@ class SP811FR_Device(private val transport: Transport, private val password: Str
     this.getByteArrayImage(url)?.let { image ->
       Log.d("SP811", "setHeader size : ${image.size}")
       var size = image.size
-      if(size > 3700){
+      if (size > 3700) {
         throw Exception("Размер логотипа должен быть не более 3,6 кб. Размер 288x100")
       }
       var res = requestWrapper(

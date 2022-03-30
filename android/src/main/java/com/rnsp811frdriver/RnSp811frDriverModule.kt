@@ -14,7 +14,7 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
     return "RnSp811frDriver"
   }
 
-  //Arguments.createMap()
+
   @ReactMethod
   fun connect(
     data: ReadableMap,
@@ -23,19 +23,19 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
     val host = data.getString("host");
     val port = data.getInt("port");
     val password = data.getString("password");
+    this.useNewTread(promise) {
+      if (!host.isNullOrEmpty() && port > 0 && !password.isNullOrEmpty()) {
+        this.transport = Transport(host, port)
+        this.transport?.let {
+          it.connect()
+          this@RnSp811frDriverModule.driver = SP811FR_Device(this.transport!!, password)
+        }
 
-    if (!host.isNullOrEmpty() && port > 0 && !password.isNullOrEmpty()) {
-      this.transport = Transport(host, port)
-      this.transport?.let {
-        it.connect()
-        this@RnSp811frDriverModule.driver = SP811FR_Device(this.transport!!, password)
+        promise.resolve(Arguments.createMap())
+      } else {
+        promise.reject(Exception("Не переданы обязательные параметры для подключения "))
       }
-
-      promise.resolve(Arguments.createMap())
-    } else {
-      promise.reject(Exception("Не переданы обязательные параметры для подключения "))
     }
-
   }
 
   @ReactMethod
@@ -59,7 +59,6 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
     type: String,
     promise: Promise
   ) {
-//    this.useNewTread(promise) {
     var res: Response? = null
     when (type) {
       "1" -> res = this.driver?.openDocument(DocumentTypes.NON_FISCAL_DOCUMENT)
@@ -78,8 +77,6 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
       promise.resolve(Arguments.createMap())
     }
 
-//    }
-
 
   }
 
@@ -91,13 +88,13 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
     this.useNewTread(promise) {
       try {
         val res = this.driver?.setHeader(url)
-        if(res !== null){
-          if(res.isError){
+        if (res !== null) {
+          if (res.isError) {
             promise.reject(java.lang.Exception(res.errorMsg))
           }
         }
         promise.resolve(Arguments.createMap())
-      }catch (e:Exception){
+      } catch (e: Exception) {
         promise.reject(java.lang.Exception(e.message))
       }
 
@@ -282,6 +279,24 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
+  fun getData(
+    query: Int,
+    promise: Promise
+  ) {
+    this.useNewTread(promise) {
+      try {
+        val res = this.driver?.getData(query)
+        promise.resolve(res)
+      } catch (e: java.lang.Exception) {
+        promise.reject(e)
+      }
+
+    }
+
+
+  }
+
+  @ReactMethod
   fun holdCheck(
     promise: Promise
   ) {
@@ -438,7 +453,8 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
     promise: Promise
   ) {
     this.useNewTread(promise) {
-      val res = this.driver?.setFrParams(row, column, this.charsetEncoder.encode(value).toByteArray())
+      val res =
+        this.driver?.setFrParams(row, column, this.charsetEncoder.encode(value).toByteArray())
       if (res?.isError == true) {
         promise.reject(java.lang.Exception(res.errorMsg))
       } else {
@@ -468,7 +484,7 @@ class RnSp811frDriverModule(reactContext: ReactApplicationContext) :
 
         job()
 
-      } catch (e: java.lang.Exception) {
+      } catch (e: Exception) {
         e.message?.let { Log.e("SP811", it) }
         promise.reject(e)
       }

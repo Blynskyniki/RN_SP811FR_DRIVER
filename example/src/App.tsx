@@ -2,6 +2,7 @@ import {
   IRnSp811frDriverDiscountType,
   IRnSp811frDriverDocumentType,
   IRnSp811frDriverPaymentType,
+  IRnSp811frDriverStatusQueries,
   IRnSp811frDriverVatType,
   RnSp811frDriver,
 } from '@kari/rn-sp811fr-driver';
@@ -22,7 +23,13 @@ import {
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 const driver = new RnSp811frDriver();
-
+export function getEnumKeyByEnumValue(
+  myEnum: any,
+  enumValue: number | string
+): string {
+  let keys = Object.keys(myEnum).filter((x) => myEnum[x] == enumValue);
+  return keys.length > 0 ? keys[0] : '';
+}
 const AlertError = (e: Error | unknown) => {
   console.error(e);
   Alert.alert('Ошибка', (e as Error).message, [
@@ -425,6 +432,7 @@ const items: ICoolButtonProps[] = [
         await driver.zReport();
         await driver.setFrParamCyr(22, 2, 'БАНКОВСКАЯ КАРТА');
         await driver.setFrParamCyr(22, 1, 'НАЛИЧНЫЕ');
+        await driver.setFrParamCyr(22, 1, 'ПОДАРОЧНАЯ КАРТА');
 
         await driver.disconnect();
       } catch (e) {
@@ -477,6 +485,46 @@ const items: ICoolButtonProps[] = [
         await driver.initFR();
         await driver.setFooterTxt(['Строка 1', 'Строка 2']);
         await driver.initFR();
+        await driver.disconnect();
+      } catch (e) {
+        AlertError(e);
+        await driver.disconnect();
+      }
+    },
+  },
+  {
+    title: 'Получение информации из ККМ',
+    onPress: async (host, port) => {
+      try {
+        await driver.connect({
+          port,
+          host,
+          password: 'PONE',
+        });
+        let dataMap = '';
+
+        const keys = Object.keys(IRnSp811frDriverStatusQueries).filter((v) =>
+          Number.isNaN(+v)
+        );
+        for (const settingKey of keys) {
+          console.info(settingKey, IRnSp811frDriverStatusQueries[settingKey]);
+          try {
+            dataMap += `${settingKey} ${await driver.getData(
+              +IRnSp811frDriverStatusQueries[settingKey]
+            )} \n`;
+          } catch (e) {
+            console.error(
+              settingKey,
+              IRnSp811frDriverStatusQueries[settingKey],
+              e
+            );
+          }
+        }
+        console.log(dataMap);
+
+        Alert.alert('Параметры', dataMap, [
+          { text: 'OK', onPress: () => console.log('OK Pressed') },
+        ]);
         await driver.disconnect();
       } catch (e) {
         AlertError(e);
@@ -618,7 +666,7 @@ const IPPort = ({ onChangeTextIp, onChangeTextPort, ip, port }: IPort) => {
 
 const App = () => {
   const isDarkMode = useColorScheme() === 'dark';
-  const [ip, setIP] = useState('192.168.3.106');
+  const [ip, setIP] = useState('192.168.2.160');
   const [port, setPort] = useState('9876');
 
   const backgroundStyle = {

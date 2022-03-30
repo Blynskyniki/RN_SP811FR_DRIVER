@@ -63,6 +63,61 @@ export enum IRnSp811frDriverDiscountType {
 export enum IRnSp811frDriverPaymentType {
   CASH = 0,
   CARD = 2,
+  GIFT_CARD = 3,
+}
+
+export enum IRnSp811frDriverStatusQueries {
+  // вернуть номер текущей смены
+  SESSION_STATUS = 1,
+  // вернуть номер смены для последней перерегистрации ФР
+  SESSION_STATUS_FR = 2,
+  // вернуть суммы продаж по типам платежа
+  SALES_SUM = 3,
+  // вернуть суммы возвратов по типам платежа;
+  REFUND_SUM = 4,
+  // вернуть сумму наличных в
+  // денежном ящике
+  AMOUNT_CASH_IN_CACHBOX = 5,
+  // вернуть номер следующего
+  // документа
+  NUMBER_OF_NEXT_DOC = 6,
+  // вернуть номер следующего чека
+  NUMBER_OF_NEXT_RECEIPT = 7,
+  // вернуть номер следующего отчета
+  NUMBER_OF_NEXT_REPORT = 8,
+  // вернуть УНП
+  GET_YNP = 9,
+  // вернуть регистрационный номер ФР
+  GET_FR_REGISTER_NUMBER = 10,
+  // вернуть счетчики текущего
+  // документа
+  GET_COUNTERS_OF_CURRENT_DOC = 12,
+  // вернуть количество оформленных
+  // чеков по типам операций
+  GET_COUNT_OPERATIONS = 13,
+  // вернуть суммы по оформленным
+  // чекам
+  GET_SUM_OPERATIONS = 14,
+  // вернуть суммы по скидкам/ наценкам
+  GET_SUM_DISCOUNTS = 15,
+  //  вернуть суммы налогов по продажам
+  GET_TAX_OF_SALES = 16,
+  // вернуть суммы налогов по
+  // возвратам
+  GET_TAX_OF_REFUNDS = 17,
+  // вернуть количество оплат по
+  // продажам
+  GET_COUNT_PAYMENTS_OF_SALES = 18,
+  // вернуть количество оплат по
+  // возвратам
+  GET_COUNT_PAYMENTS_OF_REFUNDS = 19,
+  // вернуть дату и время последней
+  // фискальной операции (продажа, возврат,
+  // сменный отчет (Z-отчет), фискализация/
+  // перерегистрация)
+  GET_DATE_OF_LAST_OPERATIONS = 20,
+  // вернуть дату и время фискализации/перерегистрации
+  GET_DATE_OF_FISCALIZATION = 21,
 }
 
 export interface IRnSp811frDriverDiscountData {
@@ -84,6 +139,9 @@ export class RnSp811frDriver {
 
   public disconnect(): Promise<void> {
     return Driver.disconnect();
+  }
+  public getData(query: IRnSp811frDriverStatusQueries): Promise<string> {
+    return Driver.getData(query);
   }
 
   public openDocument(type: IRnSp811frDriverDocumentType): Promise<void> {
@@ -170,6 +228,7 @@ export class RnSp811frDriver {
   ): Promise<void> {
     return Driver.setFrParams(row, column, value);
   }
+
   // Для русского текста в параметрах
   public setFrParamCyr(
     row: number,
